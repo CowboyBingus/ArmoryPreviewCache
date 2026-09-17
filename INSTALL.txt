@@ -1,0 +1,35 @@
+Armory Preview Cache - v16
+
+Speeds up equipment thumbnails in the Armory and mission briefing by caching rendered previews and preloading their assets.
+
+INSTALL
+1. Close Helldivers 2.
+2. Import Armory-Preview-Cache-v16.zip into Arsenal or HD2MM, replacing any older entry.
+3. Install and enable Bingus Shared Loader v13 or newer alongside it.
+4. With Arsenal's default priority, place the shared loader last, then Purge / Deploy.
+
+Helmets, armor, capes, primary/secondary weapons and throwables are supported in
+Armory grids, both pre-select screens, and mission briefing's overview and pickers.
+Completed previews are reused across menu visits. Equipment packages and weapon
+attachments load ahead, with current and recently viewed equipment prioritized.
+
+The learned asset profile survives restarts; rendered images remain session-only.
+First-time images still need native rendering. Cache eviction and memory limits
+can require an image to be generated again. Gameplay and live previews are unchanged.
+
+Requires Steam build 24826606 / EXE 1.8.45317.0. In-game functionality confirmed
+by the maintainer; no quantified cold-start performance claim is made.
+
+OPTIONAL SETTINGS
+Create %LOCALAPPDATA%/ArmoryPreviewCache.ini before launch:
+  enabled=1
+  prewarm=1
+  images=1
+Set a value to 0 to disable that feature. The retired disk option is ignored.
+Logs and learned profiles use %LOCALAPPDATA%/ArmoryPreviewCache.*.
+Limits: eight retained atlases / 128 MiB nominal pixels and 128 package leases.
+Low memory suspends caching until available memory recovers.
+
+REMOVE
+Close the game, disable/remove the mod, then Purge / Deploy. Keep the loader if
+other mods need it. A megapack copy must also be disabled to turn this feature off.

@@ -1,0 +1,1 @@
+Speeds up equipment thumbnails in the Armory and mission briefing by caching rendered previews and preloading their assets.
