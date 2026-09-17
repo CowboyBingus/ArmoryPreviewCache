@@ -21,7 +21,8 @@ return function(create_api,native,policy,profile,signatures,build,image_native,i
         if not force and last_log and now-last_log<2 then return end
         last_log=now
         pcall(function()
-            local f=path and io.open(path..'.log','w');if not f then return end
+            local logger=rawget(_G,'CowboyBingusModLoader')
+            local f=logger and logger.open_log and logger.open_log('ArmoryPreviewCache.log');if not f then return end
             f:write(build.revision..'\nstatus='..state.status..'\n')
             if api and api.process_id then
                 f:write('process_id='..api.process_id..'\nprocess_created_filetime_hex='..api.process_created_filetime_hex..'\n')

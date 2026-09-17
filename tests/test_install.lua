@@ -27,6 +27,10 @@ local function scenario(mode)
             for i=1,select('#',...)do files[path]=files[path]..tostring(select(i,...))end;return self
         end,close=function()end}
     end}
+    env.CowboyBingusModLoader.open_log=function(name)
+        assert(name=='ArmoryPreviewCache.log')
+        return env.io.open('fixture/CowboyBingus/Helldivers2/Logs/'..name,'w')
+    end
     if mode=='off'then files['fixture/ArmoryPreviewCache.ini']='enabled=0'end
     if mode=='normal'then files['fixture/ArmoryPreviewCache.ini']='disk=1'end
     env.update=function(dt,marker)
@@ -68,9 +72,10 @@ local function scenario(mode)
             assert(image_ticks==2 and image_restores==1)
             env.update(.001,'marker')
             assert(image_ticks==3 and image_restores==2,'Image binding must run below the asset polling interval')
-            assert(files['fixture/ArmoryPreviewCache.log']:find('rendered_image_cache=1',1,true))
-            assert(files['fixture/ArmoryPreviewCache.log']:find('disk_status=removed_after_v7_crash',1,true))
-            assert(files['fixture/ArmoryPreviewCache.log']:find('process_created_filetime_hex=01dd46d0dd8ae445',1,true))
+            local log=assert(files['fixture/CowboyBingus/Helldivers2/Logs/ArmoryPreviewCache.log'])
+            assert(log:find('rendered_image_cache=1',1,true))
+            assert(log:find('disk_status=removed_after_v7_crash',1,true))
+            assert(log:find('process_created_filetime_hex=01dd46d0dd8ae445',1,true))
         elseif mode=='build'then assert(env.ArmoryPreviewCache.status:find('Unsupported game build',1,true))
         elseif mode=='off'then assert(env.ArmoryPreviewCache.status=='disabled_by_config')
         elseif mode=='snapshot'then assert(env.ArmoryPreviewCache.status=='waiting_for_ui')end
