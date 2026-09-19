@@ -60,6 +60,27 @@ function M.new(api,game,exe,signatures,test_calls)
     local self={}
     local retired={}
     local working_backup,restore_working
+    -- Configured weapon slots observed in the native preview queue, keyed by the
+    -- request identity. A weapon's applied pattern and attachments live here, not
+    -- in the thumbnail request record, so this is the only appearance signal the
+    -- cache can key on. The queue only holds work while a preview is generating,
+    -- so the last observation per identity is remembered for the session.
+    local preview_observed={}
+    local function observe_previews()
+        local preview=ptr(game+0x277fe98)
+        if not preview then return end
+        local header=read(preview+50448,8)
+        local head,tail=u32(header,0),u32(header,4)
+        assert(head<128 and tail<128,'Preview queue bounds changed')
+        local index,jobs=head,0
+        while index~=tail and jobs<16 do
+            local row=read(preview+50456+index*200,200)
+            local count=u32(row,80)
+            assert(count<=10,'Preview queue dependency bound changed')
+            preview_observed[raw(row,64,8)]=raw(row,88,count*8)
+            index=(index+1)%128;jobs=jobs+1
+        end
+    end
     -- Native state 8 describes a request, not pixels in a newly allocated
     -- replacement. Track completed card regions that the swap left blank.
     local blank_working
@@ -202,6 +223,9 @@ function M.new(api,game,exe,signatures,test_calls)
         result.atlas=atlas;result.width=w;result.height=h;result.bytes=w*h*4
         result.descriptor_id=raw(desc,0,8)
         result.layout=raw(mb,16,16)..raw(mb,11100,8)..raw(desc,8,28)
+        -- Appearance observation is an optimization; a transient queue read must
+        -- never invalidate the sample.
+        pcall(observe_previews)
         local by_index,ids={},{}
         result.source_cards={};result.blank_cards=0
         if blank_working and (blank_working.atlas~=atlas or blank_working.id~=result.descriptor_id
@@ -222,7 +246,8 @@ function M.new(api,game,exe,signatures,test_calls)
                     local input=raw(mb,o,104)
                     stamp[#stamp+1]=M.key('',input,'')..raw(mb,o+56,16)
                     if kind<=4 then
-                        local item={input=input,card=c,index=i,ready=state==8,rectangle=raw(mb,o+56,16)}
+                        local item={input=input,card=c,index=i,ready=state==8,rectangle=raw(mb,o+56,16),
+                            preview=preview_observed[raw(input,24,8)]}
                         by_index[c*15+i]=item
                     end
                 end
@@ -369,7 +394,8 @@ function M.new(api,game,exe,signatures,test_calls)
                 and x+w<=1.001 and y+h<=1.001,'Invalid completed image rectangle')
             local pixels_w,pixels_h=w*s.tile_width,h*s.tile_height*6
             fp[0],fp[1],fp[2],fp[3]=x,y,x+w,y+h
-            p.entries[item.key]={uv=ffi.string(fp,16),width=pixels_w,height=pixels_h}
+            p.entries[item.key]={uv=ffi.string(fp,16),width=pixels_w,height=pixels_h,
+                preview=item.preview}
             end
         end
         if not next(p.entries)then return end
@@ -452,6 +478,30 @@ function M.new(api,game,exe,signatures,test_calls)
                     else misses=misses+1 end
                 end
             else misses=misses+1 end
+        end
+        -- Presentation follows the cache. A crop whose key the cache no longer
+        -- holds (the weapon was re-configured, or the entry was evicted) must
+        -- stop being drawn, so the widget is handed back to the native pipeline
+        -- and its own render becomes visible as soon as it is composed.
+        local tm=ptr(game+0x277fdb8)
+        local atlas=tm and ptr(tm+11112)
+        if atlas then
+            for key,b in pairs(bindings)do
+                if not entries[b.key]and b.world==s.world and b.owner==s.owner then
+                    local record=api.pointer(read(b.widget+1984,8))
+                    local material_pointer=read(b.element+328,8)
+                    if material_pointer==b.material_pointer then
+                        set_texture(b.element,984135806,atlas)
+                        if record and read(b.widget+1984,8)==b.record_pointer
+                            and read(record,8)==b.visual and read(record+60,8)==b.indices
+                            and read(b.widget+2005,1)~='\0' then
+                            byte(record+68,1)
+                            set_alpha(b.element,0);set_alpha(b.widget+616,1)
+                        end
+                    end
+                    bindings[key]=nil
+                end
+            end
         end
         return hits,misses,early
     end

@@ -1,4 +1,7 @@
-TEST BUILD: mission-mode and centralized-log corrections. In-game validation pending.
+TEST BUILD: a weapon pattern or attachment change now clears the retained
+preview immediately and tracks the re-render, so the tile updates on the
+back-out instead of after the whole category rebuilds. In-game validation
+pending.
 
 Requires Bingus Shared Loader v14 for the shared log folder.
 
@@ -6,7 +9,7 @@ Logs: %LOCALAPPDATA%/CowboyBingus/Helldivers2/Logs
 
 
 
-Armory Preview Cache - v16.1
+Armory Preview Cache - v18
 
 
 
@@ -18,7 +21,7 @@ INSTALL
 
 1. Close Helldivers 2.
 
-2. Import Armory-Preview-Cache-v16.1.zip into Arsenal or HD2MM, replacing any older entry.
+2. Import Armory-Preview-Cache-v18.zip into Arsenal or HD2MM, replacing any older entry.
 
 3. Install and enable Bingus Shared Loader v14 or newer alongside it.
 
@@ -40,7 +43,15 @@ The learned asset profile survives restarts; rendered images remain session-only
 
 First-time images still need native rendering. Cache eviction and memory limits
 
-can require an image to be generated again. Gameplay and live previews are unchanged.
+can require an image to be generated again. A retained preview is bound while the
+
+game re-renders the item. After a pattern or attachment change the tile stops
+
+showing the old appearance immediately and presents the new render as soon as
+
+that item is composed, without waiting for the whole category. Gameplay and live
+
+previews are unchanged.
 
 
 

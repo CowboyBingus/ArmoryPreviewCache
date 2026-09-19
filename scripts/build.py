@@ -89,7 +89,7 @@ def main():
     tests=''
     for name in ('test_policy.lua','test_install.lua','test_images.lua','test_partial_images.lua','test_image_keys.lua',
                  'test_v10_images.lua','test_v10_policy.lua','test_material_synthetic.lua',
-                 'test_prewarm_recency.lua'):
+                 'test_prewarm_recency.lua','test_render_refresh.lua'):
         tests+=run(LUA,ROOT/'tests'/name,ROOT)
     if '--research' in sys.argv:
         tests+=run(LUA,ROOT/'tests/test_dependencies.lua',ROOT)
@@ -133,9 +133,9 @@ def main():
     tests+='PASS: retired disk modules, callbacks and native GPU transfer entry points absent from shipped source\n'
     data=compile_resource(source,BUILD,'armory_preview_cache')
     archive(BUILD,RESOURCE,data)
-    cache_release=package(BUILD,'Armory Preview Cache','ArmoryPreviewCache','v16.1',
+    cache_release=package(BUILD,'Armory Preview Cache','ArmoryPreviewCache','v18',
         '6346a6a5-289b-436c-8cdb-c335afc9e2a7',RESOURCE,
-        {'requires':{'shared_loader_api':1,'registered_by':'loader-v14'}},tests)
+        {'requires':{'shared_loader_api':1,'registered_by':'loader-v13'}},tests)
     (BUILD/'offline-tests.txt').write_text(tests)
     print('Prepared for installation with Bingus-Shared-Loader-v13.zip: '+str(cache_release))
 

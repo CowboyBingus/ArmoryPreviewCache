@@ -42,6 +42,7 @@
   "tests/test_partial_images.lua",
   "tests/test_policy.lua",
   "tests/test_prewarm_recency.lua",
+  "tests/test_render_refresh.lua",
   "tests/test_v10_images.lua",
   "tests/test_v10_policy.lua"
 ]

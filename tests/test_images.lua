@@ -38,24 +38,35 @@ s=row('fresh-1','armor',true,false);cache:before();cache:tick(false)
 s=row('fresh-1','helmet',false,true);cache:before();cache:tick(false)
 assert(cache.retained==2 and cache.last_hits==1,'Repeat must bind a retained helmet while native generation is incomplete')
 assert(not s.complete,'Cache hits must not forge native completion')
-s=row('fresh-2','helmet',true,false);cache:before();cache:tick(false)
-s=row('fresh-2','armor',false,true);cache:before();cache:tick(false)
-assert(cache.retained==2 and cache.last_hits==1,'An already-cached category must not retain another atlas')
+-- A native rebuild re-renders cached items under the same request identity: a
+-- weapon pattern or attachment change never alters that identity, so the
+-- superseded crop must be replaced by the pixels the rebuild produced.
+s=row('fresh-2','helmet',true,false);cache:tick(false)
+s=row('fresh-2','armor',false,true);cache:tick(false)
+assert(cache.retained==3 and cache.refreshed==1 and cache.last_hits==1,
+    'A re-rendered cached item must adopt its new pixels')
+-- An item whose render did not change keeps serving the crop it already has.
+s=row('fresh-3','helmet',true,false);cache:tick(false)
+assert(cache.retained==3 and cache.refreshed==1 and cache.pending_items==0
+    and cache.missing_ready_items==0,'An unchanged cached item must not retain another atlas')
+s=row('fresh-3','armor',true,false);cache:tick(false)
+s=row('fresh-3','helmet',false,true);cache:tick(false)
+assert(cache.retained==4 and cache.refreshed==2,'Every rebuilt crop must be adopted once')
 -- A late callback cannot claim that overwritten pixels are immutable.
-s=row('fresh-2','cape',true,false);cache:tick(false)
-s=row('fresh-2','weapon',false,false);cache:tick(false)
-assert(cache.retained==2 and cache.late_switches==1 and not cache.entries.cape)
+s=row('fresh-4','cape',true,false);cache:tick(false)
+s=row('fresh-4','weapon',false,false);cache:tick(false)
+assert(cache.retained==4 and cache.late_switches==1 and not cache.entries.cape)
 -- Layout changes invalidate candidates and keys before handoff.
-s=row('fresh-2','cape',true,false);s.capture_id='new-cape';cache:tick(false)
-s=row('fresh-2','weapon',false,true);s.layout='resized';cache:tick(false)
-assert(cache.retained==2 and not cache.entries.cape)
+s=row('fresh-4','cape',true,false);s.capture_id='new-cape';cache:tick(false)
+s=row('fresh-4','weapon',false,true);s.layout='resized';cache:tick(false)
+assert(cache.retained==4 and not cache.entries.cape)
 -- Pressure releases only detached textures and keeps original presentation.
 cache:before();cache:tick(true)
-assert(cache.bytes==0 and #cache.textures==0 and adapter.destroys==2)
+assert(cache.bytes==0 and #cache.textures==0 and adapter.destroys==4)
 -- A reused world must not serve images from the former context.
 s=row('new-working','helmet',true,false);cache:tick(false)
 s=row('new-working','armor',false,true);cache:tick(false)
-s=row('fresh-3','helmet',false,false);s.context='new-world';cache:tick(false)
+s=row('fresh-5','helmet',false,false);s.context='new-world';cache:tick(false)
 assert(cache.last_hits==0 and cache.bytes==0)
 -- Bound memory; no unbounded allocation when eight atlases have been retained.
 for i=1,10 do

@@ -30,7 +30,7 @@ return function(create_api,native,policy,profile,signatures,build,image_native,i
             f:write('asset_residency_cache=1\nrendered_image_cache='..(image_cache and image_cache.enabled and '1' or '0')..'\nmax_packages=128\n')
             if image_cache then
                 f:write('image_status='..image_cache.status..'\nimage_screen='..(image_cache.screen or 'none')..'\n')
-                for _,key in ipairs({'bytes','hits','misses','last_hits','last_misses','early_hits','last_early_hits','retained','released','late_switches','pending_drops','ready_items','missing_ready_items','blank_ready_items','pending_items','partial_retained','idle_retained','evicted','preselect_hits','briefing_hits','clear_count','widget_count','named_material_widgets'})do
+                for _,key in ipairs({'bytes','hits','misses','last_hits','last_misses','early_hits','last_early_hits','retained','released','late_switches','pending_drops','ready_items','missing_ready_items','blank_ready_items','rendered_items','refreshed','changed_items','reappeared','pending_items','partial_retained','idle_retained','evicted','preselect_hits','briefing_hits','clear_count','widget_count','named_material_widgets'})do
                     f:write('image_'..key..'='..tostring(image_cache[key] or 0)..'\n')
                 end
                 f:write('image_atlases='..#image_cache.textures..'\n')
