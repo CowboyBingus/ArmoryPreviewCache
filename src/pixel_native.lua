@@ -11,19 +11,19 @@ function M.new(api,game,exe,signatures,test_calls)
         local bytes=s.hex:gsub('..',function(v)return string.char(tonumber(v,16))end)
         assert(read(exe+s.rva,#bytes)==bytes,'Pixel instruction mismatch')
     end
-    local root=ptr(game+0x276c020);assert(root==exe+0x27ccc20,'Pixel API root mismatch')
+    local root=ptr(game+0x3326308);assert(root==exe+0x27c8d80,'Pixel API root mismatch')
     local app=ptr(root+16)
-    for offset,rva in pairs({[432]=0x31a6b0,[456]=0x31ac20,[472]=0x31ac60,[480]=0x31acd0})do
+    for offset,rva in pairs({[432]=0x31b500,[456]=0x31ba70,[472]=0x31bab0,[480]=0x31bb20})do
         assert(ptr(app+offset)==exe+rva,'Pixel application API mismatch')
     end
     local calls=test_calls or {}
-    local request=calls.request or ffi.cast('uint32_t (*)(void *,uint16_t)',exe+0x31a6b0)
-    local done=calls.done or ffi.cast('uint8_t (*)(uint32_t)',exe+0x31ac20)
-    local take=calls.take or ffi.cast('void *(*)(void *,uint32_t)',exe+0x31ac60)
-    local free=calls.free or ffi.cast('void (*)(void *)',exe+0x31acd0)
-    local create=calls.create or ffi.cast('void *(*)(int,int,int,void *)',exe+0x31d8f0)
-    local allocate=calls.allocate or ffi.cast('void *(*)(void *,void *,uint64_t,uint64_t)',exe+0x5c0ef0)
-    local release=calls.release or ffi.cast('void (*)(void *,void *,uint64_t)',exe+0x5c0fb0)
+    local request=calls.request or ffi.cast('uint32_t (*)(void *,uint16_t)',exe+0x31b500)
+    local done=calls.done or ffi.cast('uint8_t (*)(uint32_t)',exe+0x31ba70)
+    local take=calls.take or ffi.cast('void *(*)(void *,uint32_t)',exe+0x31bab0)
+    local free=calls.free or ffi.cast('void (*)(void *)',exe+0x31bb20)
+    local create=calls.create or ffi.cast('void *(*)(int,int,int,void *)',exe+0x31e740)
+    local allocate=calls.allocate or ffi.cast('void *(*)(void *,void *,uint64_t,uint64_t)',exe+0x5c2e10)
+    local release=calls.release or ffi.cast('void (*)(void *,void *,uint64_t)',exe+0x5c2ed0)
     local self={submitted_bytes=0,submitted_count=0}
     function self:request(t)
         assert(read(t.handle,8)==t.id,'Readback texture identity changed')
@@ -48,8 +48,8 @@ function M.new(api,game,exe,signatures,test_calls)
     function self:allocate(size)
         assert(size>0 and size<=16*1024*1024 and self.submitted_bytes+size<=128*1024*1024
             and self.submitted_count<8,'Pixel upload lifetime budget full')
-        local a=ptr(exe+0x1a141f0);local v=ptr(a)
-        assert(ptr(v+48)==exe+0x5c0ef0 and ptr(v+64)==exe+0x5c0fb0,'Pixel allocator mismatch')
+        local a=ptr(exe+0x1a101f8);local v=ptr(a)
+        assert(ptr(v+48)==exe+0x5c2e10 and ptr(v+64)==exe+0x5c2ed0,'Pixel allocator mismatch')
         local out=ffi.new('void *[3]');allocate(a,out,size,8);assert(out[0]~=nil,'Pixel allocation failed')
         return {pixels=ffi.cast('uint8_t *',out[0]),allocator=a,size=size}
     end

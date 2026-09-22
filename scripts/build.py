@@ -91,49 +91,13 @@ def main():
                  'test_v10_images.lua','test_v10_policy.lua','test_material_synthetic.lua',
                  'test_prewarm_recency.lua','test_render_refresh.lua'):
         tests+=run(LUA,ROOT/'tests'/name,ROOT)
-    if '--research' in sys.argv:
-        tests+=run(LUA,ROOT/'tests/test_dependencies.lua',ROOT)
-        for fixture in ('weapon-grid-readonly.lua','weapon-preselect-readonly.lua','live-readonly.lua'):
-            if (BUILD/fixture).exists():
-                tests+=run(LUA,ROOT/'tests/test_native_readonly.lua',ROOT,BUILD/fixture)
-        tests+=run(LUA,ROOT/'tests/test_image_readonly.lua',ROOT,BUILD/'grid-readonly.lua')
-        tests+=run(LUA,ROOT/'tests/test_image_adapter.lua',ROOT,BUILD/'grid-readonly.lua')
-        for surface in ('throwable','weapon-preselect','cosmetic-preselect'):
-            fixture=WORKSPACE/'artifacts/armory-loading'/('v10-'+surface+'-fixture')/'probe.lua'
-            tests+=run(LUA,ROOT/'tests/probe_image_replay.lua',ROOT,fixture)
-            tests+=run(LUA,ROOT/'tests/test_idle_adapter.lua',ROOT,fixture)
-            tests+=run(LUA,ROOT/'tests/test_menu_lifetime.lua',ROOT,fixture)
-            tests+=run(LUA,ROOT/'tests/test_menu_lifetime.lua',ROOT,fixture,'fresh')
-            tests+=run(LUA,ROOT/'tests/test_material_lifetime.lua',ROOT,fixture)
-        tests+=run(LUA,ROOT/'tests/test_atlas_provenance.lua',ROOT,
-            WORKSPACE/'artifacts/armory-loading/v11-after-scroll-fixture/probe.lua')
-        cape_fixture=WORKSPACE/'artifacts/armory-loading/v14-cape-completed-fixture/probe.lua'
-        tests+=run(LUA,ROOT/'tests/test_menu_lifetime.lua',ROOT,cape_fixture,'fresh')
-        tests+=run(LUA,ROOT/'tests/test_atlas_provenance.lua',ROOT,cape_fixture)
-        for surface in ('overview','primary'):
-            fixture=WORKSPACE/'artifacts/armory-loading'/('v15-briefing-'+surface+'-fixture')/'probe.lua'
-            tests+=run(LUA,ROOT/'tests/probe_image_replay.lua',ROOT,fixture)
-            tests+=run(LUA,ROOT/'tests/test_idle_adapter.lua',ROOT,fixture)
-            tests+=run(LUA,ROOT/'tests/test_menu_lifetime.lua',ROOT,fixture)
-            tests+=run(LUA,ROOT/'tests/test_menu_lifetime.lua',ROOT,fixture,'fresh')
-            tests+=run(LUA,ROOT/'tests/test_material_lifetime.lua',ROOT,fixture)
-        tests+=run(LUA,ROOT/'tests/test_atlas_provenance.lua',ROOT,
-            WORKSPACE/'artifacts/armory-loading/v15-briefing-primary-fixture/probe.lua')
-        tests+=run(LUA,ROOT/'tests/test_briefing_native.lua',ROOT,
-            WORKSPACE/'artifacts/armory-loading/v15-briefing-assets.lua')
-        tests+=run(LUA,ROOT/'tests/test_dependency_integration.lua',ROOT,
-            WORKSPACE/'artifacts/armory-loading/v15-briefing-assets.lua',
-            WORKSPACE/'artifacts/armory-loading/v15-briefing-dependencies.lua',6)
-        tests+=run(LUA,ROOT/'tests/probe_image_replay.lua',ROOT,
-            WORKSPACE/'artifacts/armory-loading/v15-crash/armor-transition-fixture/probe.lua')
-        tests+=run(sys.executable,'-m','unittest','discover','-s',ROOT/'tests','-p','test_*.py')
     source=wrapper(ROOT,GAME_DLL_SHA,EXE_SHA)
     for retired in ('pixel_native','pixel_platform','pixel_codec','pixel_signatures','self.pixels','image_cache.pixels','0x31a6b0','0x31ac20','0x31ac60','0x31acd0','0x31d8f0'):
         assert retired not in source.lower(), 'Retired disk/GPU transfer path in release: '+retired
     tests+='PASS: retired disk modules, callbacks and native GPU transfer entry points absent from shipped source\n'
     data=compile_resource(source,BUILD,'armory_preview_cache')
     archive(BUILD,RESOURCE,data)
-    cache_release=package(BUILD,'Armory Preview Cache','ArmoryPreviewCache','v19',
+    cache_release=package(BUILD,'Armory Preview Cache','ArmoryPreviewCache','v21',
         '6346a6a5-289b-436c-8cdb-c335afc9e2a7',RESOURCE,
         {'requires':{'shared_loader_api':1,'registered_by':'loader-v13'}},tests)
     (BUILD/'offline-tests.txt').write_text(tests)

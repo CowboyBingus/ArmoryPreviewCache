@@ -1,3 +1,6 @@
+The UI repair updates the screen stack, controller IDs and UI world fields. Live read-only checks resolve the ship Armory and loadout equipment queues, with 15 visible thumbnail widgets on each. Cache mutations and frame-time behavior still need in-game confirmation.
+
+
 ![Armory Preview Cache](assets/banner.png)
 
 - **Faster repeat visits:** Reuses completed equipment thumbnails instead of waiting for native regeneration each time you switch tabs or reopen a menu.
@@ -7,4 +10,6 @@
 - **Session image cache:** Keeps rendered thumbnails when leaving and reopening menus, within memory limits; rendered images are rebuilt after restarting the game.
 - **Original presentation:** Keeps the game's equipment appearance, thumbnail quality and live character preview.
 
-Release **v19** includes input/performance fixes. Offline checks cover this revision; in-game frame-time validation is pending. Routine diagnostics are off by default; developers can set `CowboyBingusDiagnostics = true` before initialization to enable them.
+See [validation coverage](docs/MIGRATION_VALIDATION.md) for the scope of the release checks. Routine diagnostics are off by default; developers can set `CowboyBingusDiagnostics = true` before initialization to enable them.
+
+Current version: **v21**, for game build **25327279**. See [changes](CHANGELOG.md) and [validation coverage](docs/MIGRATION_VALIDATION.md).

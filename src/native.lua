@@ -30,12 +30,12 @@ function M.new(api,game,exe,signatures,dependencies)
         local bytes=(s.hex:gsub('..',function(v)return string.char(tonumber(v,16))end))
         assert(read((s.module=='game' and game or exe)+s.rva,#bytes)==bytes,'Native instruction mismatch')
     end
-    local root_api=ptr(game+0x276c020)
-    assert(root_api==exe+0x27ccc20,'Unexpected script API')
+    local root_api=ptr(game+0x3326308)
+    assert(root_api==exe+0x27c8d80,'Unexpected script API')
     local app=ptr(root_api+16)
-    assert(ptr(app+752)==exe+0x31ff80 and ptr(app+768)==exe+0x3201e0,'Unexpected package API')
-    local acquire=ffi.cast('void (*)(void *,const uint64_t *,uint32_t)',game+0x105cae0)
-    local release=ffi.cast('void (*)(void *,const uint64_t *,uint32_t)',game+0x105cc70)
+    assert(ptr(app+752)==exe+0x320dd0 and ptr(app+768)==exe+0x321030,'Unexpected package API')
+    local acquire=ffi.cast('void (*)(void *,const uint64_t *,uint32_t)',game+0x12fe350)
+    local release=ffi.cast('void (*)(void *,const uint64_t *,uint32_t)',game+0x12fe4e0)
     local argument=ffi.new('uint64_t[1]')
     local self={api=api}
     local dependency=dependencies and dependencies.new(api,game)
@@ -43,7 +43,7 @@ function M.new(api,game,exe,signatures,dependencies)
     local kits,presets,weapons={},{},{}
 
     function self:owner()
-        local p=ptr(game+0x277fee8)
+        local p=ptr(game+0x347ceb0)
         local h=read(p,32)
         assert(u32(h,8)==1024 and u32(h,24)==2 and raw64(h,16)==zero,'Unexpected lease table')
         assert(api.pointer(h)==p+32,'Unexpected lease storage')
@@ -87,8 +87,8 @@ function M.new(api,game,exe,signatures,dependencies)
         return true
     end
     local function catalog()
-        local ko,po,wo=ptr(game+0x276c220),ptr(game+0x277ff38),ptr(game+0x276f0c0)
-        local wt=ptr(wo+0xf11130)
+        local ko,po,wo=ptr(game+0x33264f8),ptr(game+0x347cef8),ptr(game+0x346bf98)
+        local wt=ptr(wo+0xf12558)
         local kp=ptr(ko);local kc=u32(read(ko+8,4),0)
         local pc=u32(read(po+7392,4),0)
         assert(kc>0 and kc<=1024 and pc>0 and pc<=4096,'Catalogue bounds changed')
@@ -105,11 +105,11 @@ function M.new(api,game,exe,signatures,dependencies)
             local n=math.min(1024,pc-first);local rows=read(po+761060+first*24,n*24)
             for i=0,n-1 do presets[u32(rows,i*24+4)]=u32(rows,i*24+8)end
         end
-        local buckets=read(wt,1038*16);local records=read(wt+16608,519*32)
-        for i=0,1037 do
+        local buckets=read(wt,1080*16);local records=read(wt+17280,540*32)
+        for i=0,1079 do
             local id=raw64(buckets,i*16)
             if id~=zero then
-                local index=u32(buckets,i*16+8);assert(index<519,'Weapon record bound changed')
+                local index=u32(buckets,i*16+8);assert(index<540,'Weapon record bound changed')
                 local package_id=raw64(records,index*32+8)
                 if package_id~=zero then weapons[hex(id)]=hex(package_id)end
             end
@@ -137,18 +137,18 @@ function M.new(api,game,exe,signatures,dependencies)
     end
     function self:snapshot()
         local owner=self:owner()
-        local sm=ptr(game+0x277fe60);local stack=read(sm+140,24);local depth=u32(stack,20)
+        local sm=ptr(game+0x347ce28);local stack=read(sm+0x429c,24);local depth=u32(stack,20)
         local top=depth>=1 and depth<=5 and u32(stack,(depth-1)*4) or -1
-        local ui=ptr(game+0x277fdc8);local world=api.pointer(read(ui+15424,8))
-        local blocked=u32(read(ui+15884,4),0)~=0
+        local ui=ptr(game+0x347cd90);local world=api.pointer(read(ui+15432,8))
+        local blocked=u32(read(ui+15892,4),0)~=0
         -- Gameplay states cannot display thumbnails or run startup prewarming.
         -- Keep owner/world information so the policy can release old leases.
-        if top~=5 and top~=11 and depth~=0 then
+        if top~=5 and top~=14 and depth~=0 then
             return {owner=owner,world=world and pointer_key(world),menu=false,prefetch=false,
                     blocked=blocked,top=top,items={},active=false,states={}}
         end
-        local tm=ptr(game+0x277fdb8);local h=read(tm,12176)
-        assert(ptr(game+0x277fdb8)==tm and u32(h,11052)==7,'Thumbnail manager changed')
+        local tm=ptr(game+0x347cd80);local h=read(tm,12176)
+        assert(ptr(game+0x347cd80)==tm and u32(h,11052)==7,'Thumbnail manager changed')
         local active=u32(h,11064);assert(active==0xffffffff or active<6,'Invalid thumbnail active card')
         local items,states={},{}
         for card=0,5 do
@@ -166,18 +166,18 @@ function M.new(api,game,exe,signatures,dependencies)
         -- The transient UI flag toggles during normal thumbnail work. It is
         -- not a world-lifetime signal and must never invalidate held leases.
         local menu=top==5 and world~=nil
-        if top==11 and world~=nil then
+        if top==14 and world~=nil then
             -- Briefing has its own controller. State 11 alone must not enable
             -- asset work during a controller teardown or unrelated transition.
-            local dispatch=api.pointer(read(game+0x276cb80,8))
+            local dispatch=api.pointer(read(game+0x3326e68,8))
             if dispatch then
-                local count=u32(read(dispatch+5836,4),0)
+                local count=u32(read(dispatch+5740,4),0)
                 assert(count<=64,'UI dispatch bound changed')
                 local matches=0
                 if count>0 then
-                    local rows=read(dispatch+5840,count*16)
+                    local rows=read(dispatch+5744,count*16)
                     for i=0,count-1 do
-                        if u32(rows,i*16+8)==227 and api.pointer(rows,i*16)then matches=matches+1 end
+                        if u32(rows,i*16+8)==229 and api.pointer(rows,i*16)then matches=matches+1 end
                     end
                 end
                 menu=matches==1

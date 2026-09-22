@@ -14,14 +14,14 @@ function M.new(api,game)
     local function ptr(p)local value=assert(api.pointer(read(p,8)),'Dependency pointer unavailable');return value end
     local self={defaults={},attachments={},identity=nil,known_weapons={}}
     function self:refresh()
-        local database=ptr(game+0x276f0c0);local definitions=ptr(database+0xf118b0)
-        local groups=u32(read(game+0x27910e8,4),0)
+        local database=ptr(game+0x346bf98);local definitions=ptr(database+0xf12e10)
+        local groups=u32(read(game+0x348da98,4),0)
         assert(groups>0 and groups<=64,'Attachment group bounds')
-        local gp=read(game+0x2ac7730,groups*8)
-        local map=read(game+0x2a9b3f0,28)
+        local gp=read(game+0x37c5b50,groups*8)
+        local map=read(game+0x3799810,28)
         local storage=assert(api.pointer(map));local count=u32(map,8)
         assert(count>0 and count<=262144 and bit.band(count,count-1)==0,'Package mapping bounds')
-        local headers,identity={},read(database+0xf118b0,8)..gp..map
+        local headers,identity={},read(database+0xf12e10,8)..gp..map
         for i=0,groups-1 do
             local h=read(assert(api.pointer(gp,i*8)),16)
             assert(u32(h,8)<=4096,'Attachment row bounds')
@@ -61,13 +61,13 @@ function M.new(api,game)
             end
         end
         local defaults,known={},{}
-        local buckets=read(definitions,372*16)
-        local fallback=read(game+0x1e8dd48,320)
-        for i=0,371 do
+        local buckets=read(definitions,648*16)
+        local fallback=read(game+0x213f2b8,320)
+        for i=0,647 do
             local id=raw(buckets,i*16)
             if id~=zero then
-                local index=u32(buckets,i*16+8);assert(index<186,'Weapon configuration index bounds')
-                local config=read(definitions+5952+index*4872,120)
+                local index=u32(buckets,i*16+8);assert(index<324,'Weapon configuration index bounds')
+                local config=read(definitions+10368+index*46600,120)
                 local selected={}
                 for j=0,9 do
                     local kind=u32(config,j*8)
@@ -102,7 +102,7 @@ function M.new(api,game)
         return result
     end
     function self:queued()
-        local p=ptr(game+0x277fe98);local ring=read(p+50448,8+128*200)
+        local p=ptr(game+0x347ce60);local ring=read(p+50448,8+128*200)
         local head,tail=u32(ring,0),u32(ring,4)
         assert(head<128 and tail<128,'Weapon queue bounds')
         local rows={}

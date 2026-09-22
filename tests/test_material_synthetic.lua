@@ -14,12 +14,12 @@ api.read=function(a,n)
 end
 local game,exe=p(0x10000000),p(0x20000000)
 local app,sm,ui,dispatch,tm,owner,world,widget,record,atlas=0x30000000,0x30010000,0x30020000,0x30030000,0x30040000,0x30050000,0x30060000,0x30070000,0x30080000,0x30090000
-put(game+0x276c020,ptr(0x227ccc20));put(exe+0x27ccc20+16,ptr(app))
-for off,rva in pairs({[368]=0x31a100,[400]=0x31a510,[528]=0x31d1e0})do put(app+off,ptr(0x20000000+rva))end
-put(exe+0x165c090,word(32));put(game+0x277fe60,ptr(sm));put(sm+140,word(11)..string.rep('\0',16)..word(1))
-put(game+0x277fdc8,ptr(ui));put(ui+15424,ptr(world));put(game+0x276cb80,ptr(dispatch))
-put(dispatch+5836,word(1));put(dispatch+5840,ptr(owner)..word(227)..word(0))
-put(game+0x277fdb8,ptr(tm));put(tm+11112,ptr(atlas));put(tm+11136,word(1))
+put(game+0x3326308,ptr(0x227c8d80));put(exe+0x27c8d80+16,ptr(app))
+for off,rva in pairs({[368]=0x31af50,[400]=0x31b360,[528]=0x31e030})do put(app+off,ptr(0x20000000+rva))end
+put(exe+0x16588b0,word(32));put(game+0x347ce28,ptr(sm));put(sm+0x429c,word(14)..string.rep('\0',16)..word(1))
+put(game+0x347cd90,ptr(ui));put(ui+15432,ptr(world));put(game+0x3326e68,ptr(dispatch))
+put(dispatch+5740,word(1));put(dispatch+5744,ptr(owner)..word(229)..word(0))
+put(game+0x347cd80,ptr(tm));put(tm+11112,ptr(atlas));put(tm+11136,word(1))
 put(widget+1984,ptr(record));put(widget+272,word(0xc0000));put(widget+2005,'\1')
 put(record,'visual01');put(record+60,string.rep('\0',8));put(record+68,'\0');put(atlas,'atlas001')
 local element=p(widget+272);local material=ptr(0x30100000);put(element+328,material)
@@ -35,7 +35,7 @@ calls.register_image=function(_,e)assert(api.pointer(api.read(e+328,8)));registr
 calls.material=function()end;calls.byte=function()end
 calls.uv=function()end;calls.size=function()end;calls.alpha=function()end
 local a=dofile(root..'/src/image_native.lua').new(api,game,exe,{},calls)
-local w={key='equipment',owner=p(owner),world=p(world),controller_kind=227,widget=p(widget),element=element,
+local w={key='equipment',owner=p(owner),world=p(world),controller_kind=229,widget=p(widget),element=element,
     record_pointer=ptr(record),visual='visual01',indices=string.rep('\0',8),bound=true,fit=1,box_width=128,box_height=128,native_ready=false}
 local s={widgets={w}};local entries={equipment={width=128,height=128,uv=string.rep('\0',16),texture={handle=p(atlas),id='atlas001'}}}
 local function bind()

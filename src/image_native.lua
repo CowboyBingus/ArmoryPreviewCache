@@ -32,22 +32,22 @@ function M.new(api,game,exe,signatures,test_calls)
         local bytes=s.hex:gsub('..',function(v)return string.char(tonumber(v,16))end)
         assert(read((s.module=='game' and game or exe)+s.rva,#bytes)==bytes,'Image instruction mismatch')
     end
-    local root=assert(ptr(game+0x276c020));assert(root==exe+0x27ccc20,'Image API root mismatch')
+    local root=assert(ptr(game+0x3326308));assert(root==exe+0x27c8d80,'Image API root mismatch')
     local app=assert(ptr(root+16))
-    for off,rva in pairs({[368]=0x31a100,[400]=0x31a510,[528]=0x31d1e0})do
+    for off,rva in pairs({[368]=0x31af50,[400]=0x31b360,[528]=0x31e030})do
         assert(ptr(app+off)==exe+rva,'Image application API mismatch')
     end
-    assert(u32(read(exe+0x165c090,4),0)==32,'Unexpected texture format size')
+    assert(u32(read(exe+0x16588b0,4),0)==32,'Unexpected texture format size')
     local calls=test_calls or {}
-    local create=calls.create or ffi.cast('void *(*)(int,int,int,int,uint32_t,uint8_t)',exe+0x31a100)
-    local destroy=calls.destroy or ffi.cast('void (*)(void *)',exe+0x31a510)
-    local register=calls.register or ffi.cast('void (*)(uint32_t,void *)',exe+0x31d1e0)
-    local set_texture=calls.texture or ffi.cast('void (*)(void *,uint32_t,void *)',game+0x11a8500)
-    local set_uv=calls.uv or ffi.cast('void (*)(void *,uint64_t,uint64_t)',game+0x119da10)
-    local set_size=calls.size or ffi.cast('void (*)(void *,uint64_t)',game+0x11a5c80)
-    local set_alpha=calls.alpha or ffi.cast('void (*)(void *,float)',game+0x11a75f0)
-    local material=calls.material or ffi.cast('void (*)(void *,uint64_t,uint8_t)',game+0x11ae320)
-    local register_image=calls.register_image or ffi.cast('void (*)(void *,void *)',game+0x10f1650)
+    local create=calls.create or ffi.cast('void *(*)(int,int,int,int,uint32_t,uint8_t)',exe+0x31af50)
+    local destroy=calls.destroy or ffi.cast('void (*)(void *)',exe+0x31b360)
+    local register=calls.register or ffi.cast('void (*)(uint32_t,void *)',exe+0x31e030)
+    local set_texture=calls.texture or ffi.cast('void (*)(void *,uint32_t,void *)',game+0x1449950)
+    local set_uv=calls.uv or ffi.cast('void (*)(void *,uint64_t,uint64_t)',game+0x143ee60)
+    local set_size=calls.size or ffi.cast('void (*)(void *,uint64_t)',game+0x14470d0)
+    local set_alpha=calls.alpha or ffi.cast('void (*)(void *,float)',game+0x1448a40)
+    local material=calls.material or ffi.cast('void (*)(void *,uint64_t,uint8_t)',game+0x144f770)
+    local register_image=calls.register_image or ffi.cast('void (*)(void *,void *)',game+0x13925f0)
     local byte=calls.byte or function(p,v)ffi.cast('uint8_t *',p)[0]=v end
     local image_material=ffi.new('uint64_t',0x27ef0643)*0x100000000+0x5506e446
     local image_material_bytes=ffi.string(ffi.new('uint64_t[1]',image_material),8)
@@ -67,7 +67,7 @@ function M.new(api,game,exe,signatures,test_calls)
     -- so the last observation per identity is remembered for the session.
     local preview_observed={}
     local function observe_previews()
-        local preview=ptr(game+0x277fe98)
+        local preview=ptr(game+0x347ce60)
         if not preview then return end
         local header=read(preview+50448,8)
         local head,tail=u32(header,0),u32(header,4)
@@ -86,15 +86,15 @@ function M.new(api,game,exe,signatures,test_calls)
     local blank_working
     local function controller(kind)
         if not kind then
-            local sm=ptr(game+0x277fe60);if not sm then return end
-            local st=read(sm+140,24);local depth=u32(st,20)
+            local sm=ptr(game+0x347ce28);if not sm then return end
+            local st=read(sm+0x429c,24);local depth=u32(st,20)
             local top=depth>=1 and depth<=5 and u32(st,(depth-1)*4)
-            kind=top==5 and 222 or (top==11 and 227 or nil)
+            kind=top==5 and 224 or (top==14 and 229 or nil)
             if not kind then return end
         end
-        local d=ptr(game+0x276cb80);if not d then return end
-        local n=u32(read(d+5836,4),0);assert(n<=64,'Image dispatch bounds')
-        local rows=n>0 and read(d+5840,n*16) or ''
+        local d=ptr(game+0x3326e68);if not d then return end
+        local n=u32(read(d+5740,4),0);assert(n<=64,'Image dispatch bounds')
+        local rows=n>0 and read(d+5744,n*16) or ''
         local found
         for i=0,n-1 do if u32(rows,i*16+8)==kind then
             assert(not found,'Ambiguous image controller');found=api.pointer(rows,i*16)
@@ -110,9 +110,9 @@ function M.new(api,game,exe,signatures,test_calls)
     local function reconcile(clear)
         if not next(bindings)then return end
         local owner,kind=controller()
-        local ui=ptr(game+0x277fdc8)
-        local world=ui and ptr(ui+15424)
-        local tm=ptr(game+0x277fdb8)
+        local ui=ptr(game+0x347cd90)
+        local world=ui and ptr(ui+15432)
+        local tm=ptr(game+0x347cd80)
         local atlas=tm and ptr(tm+11112)
         local keep={}
         for _,b in pairs(bindings)do
@@ -202,19 +202,19 @@ function M.new(api,game,exe,signatures,test_calls)
     end
     function self:snapshot()
         local result={items={},widgets={},expected_count=0}
-        local sm=ptr(game+0x277fe60);local ui=ptr(game+0x277fdc8)
-        local tm=ptr(game+0x277fdb8)
+        local sm=ptr(game+0x347ce28);local ui=ptr(game+0x347cd90)
+        local tm=ptr(game+0x347cd80)
         if not tm then return result end
         -- The detached render texture is globally allocated through the engine
         -- application API, not owned by the transient Armory UI world. Preserve
         -- it while the thumbnail manager survives, even with no active menu.
         result.context=pointer_key(tm);result.manager=tm
         if not sm or not ui then return result end
-        local st=read(sm+140,24);local depth=u32(st,20)
+        local st=read(sm+0x429c,24);local depth=u32(st,20)
         local top=depth>=1 and depth<=5 and u32(st,(depth-1)*4)
-        local kind=top==5 and 222 or (top==11 and 227 or nil)
+        local kind=top==5 and 224 or (top==14 and 229 or nil)
         if not kind then return result end
-        local world=ptr(ui+15424);if not world then return result end
+        local world=ptr(ui+15432);if not world then return result end
         result.world=world;result.controller_kind=kind;result.owner=controller(kind)
         result.view=pointer_key(world)..string.char(kind)..(result.owner and pointer_key(result.owner) or '')
         local mb=read(tm,12176);local atlas=api.pointer(mb,11112)
@@ -267,7 +267,7 @@ function M.new(api,game,exe,signatures,test_calls)
         result.can_freeze=nonempty>0 and safe and active<6 and (phase==4 or phase==5)
         result.tile_width=float(mb,24);result.tile_height=float(mb,28)
         if not result.owner then result.can_freeze=false;return result end
-        if kind==227 then
+        if kind==229 then
             local records=read(result.owner+454728,480)
             local expected={2,3,4,0,0,1};local slots={};local valid=true
             for index=0,5 do
@@ -294,7 +294,7 @@ function M.new(api,game,exe,signatures,test_calls)
             end
         end
         local control=result.owner+280216
-        local pre=kind==222 and read(control+37968,16)
+        local pre=kind==224 and read(control+37968,16)
         if pre and pre:byte(5)==0 and u32(pre,0)<6 then
             local mode=u32(pre,12);assert(mode<=2,'Pre-select mode bounds')
             result.screen=mode==0 and 'weapon_preselect' or 'cosmetic_preselect'
@@ -315,8 +315,8 @@ function M.new(api,game,exe,signatures,test_calls)
             idle_gate(result,mb,by_index,owned)
             return result
         end
-        result.screen=kind==227 and 'briefing_grid' or 'grid'
-        local grid=result.owner+(kind==227 and 863936 or 523752)
+        result.screen=kind==229 and 'briefing_grid' or 'grid'
+        local grid=result.owner+(kind==229 and 864032 or 523752)
         local meta=read(grid+597772,24892)
         local count=u32(meta,0);assert(count<=12,'Image grid row bounds')
         -- Every nonempty card must belong to this grid. Empty cards do not
@@ -404,7 +404,7 @@ function M.new(api,game,exe,signatures,test_calls)
     function self:freeze(s,p)
         assert((s.can_freeze or (s.can_freeze_idle and p.request_id==s.capture_id))
             and s.atlas==p.atlas and s.layout==p.layout,'Unsafe atlas handoff')
-        assert(ptr(game+0x277fdb8)==s.manager and ptr(s.manager+11112)==p.atlas,'Atlas owner changed')
+        assert(ptr(game+0x347cd80)==s.manager and ptr(s.manager+11112)==p.atlas,'Atlas owner changed')
         local d,w,h=descriptor(p.atlas);assert(raw(d,0,8)==p.descriptor_id,'Atlas generation changed')
         -- Same API and six arguments as the native atlas creator. Command 14
         -- creates the replacement before command 31 registers it for later draws.
@@ -445,7 +445,7 @@ function M.new(api,game,exe,signatures,test_calls)
                         checked[entry.texture]=true
                     end
                     if not w.bound or w.invalidated or w.named_material then
-                        local tm=assert(ptr(game+0x277fdb8))
+                        local tm=assert(ptr(game+0x347cd80))
                         assert(u32(read(tm+11136,4),0)<128,'Image registration full')
                         -- Freshly recreated widgets still reference the named
                         -- thumbnail template. Clone the private material using
@@ -483,7 +483,7 @@ function M.new(api,game,exe,signatures,test_calls)
         -- holds (the weapon was re-configured, or the entry was evicted) must
         -- stop being drawn, so the widget is handed back to the native pipeline
         -- and its own render becomes visible as soon as it is composed.
-        local tm=ptr(game+0x277fdb8)
+        local tm=ptr(game+0x347cd80)
         local atlas=tm and ptr(tm+11112)
         if atlas then
             for key,b in pairs(bindings)do
@@ -507,7 +507,7 @@ function M.new(api,game,exe,signatures,test_calls)
     end
     local function destroy_owned(t)
         if t.destroyed or t.returned then return end
-        local tm=ptr(game+0x277fdb8)
+        local tm=ptr(game+0x347cd80)
         assert(not tm or ptr(tm+11112)~=t.handle,'Refusing to release the game working atlas')
         local d=read(t.handle,8)
         assert(raw(d,0,8)==t.id,'Retained texture identity changed')

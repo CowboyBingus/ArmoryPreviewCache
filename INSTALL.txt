@@ -1,93 +1,16 @@
-TEST BUILD: a weapon pattern or attachment change now clears the retained
-preview immediately and tracks the re-render, so the tile updates on the
-back-out instead of after the whole category rebuilds. In-game validation
-pending.
+Armory Preview Cache v21
 
-Requires Bingus Shared Loader v14 for the shared log folder.
+Supports Helldivers 2 Steam build 25327279 / game 1.8.45850.0.
+Requires Bingus Shared Loader v16 or newer / API 1.
+
+1. Close Helldivers 2 and use one mod manager.
+2. Replace the previous package with Armory-Preview-Cache-v21.zip.
+3. Enable this package and Bingus Shared Loader.
+4. With Arsenal's default priority, put the loader last (at the bottom).
+   With first-mod priority enabled, put the loader first.
+5. Purge / Deploy, then start the game normally.
+
+To remove or change options, close the game, disable the package, and
+Purge / Deploy again. Keep the loader enabled while other mods need it.
 
 Logs: %LOCALAPPDATA%/CowboyBingus/Helldivers2/Logs
-
-
-
-Armory Preview Cache - v19
-
-
-
-Speeds up equipment thumbnails in the Armory and mission briefing by caching rendered previews and preloading their assets.
-
-
-
-INSTALL
-
-1. Close Helldivers 2.
-
-2. Import Armory-Preview-Cache-v19.zip into Arsenal or HD2MM, replacing any older entry.
-
-3. Install and enable Bingus Shared Loader v14 or newer alongside it.
-
-4. With Arsenal's default priority, place the shared loader last, then Purge / Deploy.
-
-
-
-Helmets, armor, capes, primary/secondary weapons and throwables are supported in
-
-Armory grids, both pre-select screens, and mission briefing's overview and pickers.
-
-Completed previews are reused across menu visits. Equipment packages and weapon
-
-attachments load ahead, with current and recently viewed equipment prioritized.
-
-
-
-The learned asset profile survives restarts; rendered images remain session-only.
-
-First-time images still need native rendering. Cache eviction and memory limits
-
-can require an image to be generated again. A retained preview is bound while the
-
-game re-renders the item. After a pattern or attachment change the tile stops
-
-showing the old appearance immediately and presents the new render as soon as
-
-that item is composed, without waiting for the whole category. Gameplay and live
-
-previews are unchanged.
-
-
-
-Requires Steam build 24826606 / EXE 1.8.45317.0. In-game functionality confirmed
-
-by the maintainer; no quantified cold-start performance claim is made.
-
-
-
-OPTIONAL SETTINGS
-
-Create %LOCALAPPDATA%/ArmoryPreviewCache.ini before launch:
-
-  enabled=1
-
-  prewarm=1
-
-  images=1
-
-Set a value to 0 to disable that feature. The retired disk option is ignored.
-
-Logs use %LOCALAPPDATA%/CowboyBingus/Helldivers2/Logs/ArmoryPreviewCache.log.
-Settings and the learned profile remain at %LOCALAPPDATA%/ArmoryPreviewCache.ini
-and %LOCALAPPDATA%/ArmoryPreviewCache.profile.
-
-Limits: eight retained atlases / 128 MiB nominal pixels and 128 package leases.
-
-Low memory suspends caching until available memory recovers.
-
-
-
-REMOVE
-
-Close the game, disable/remove the mod, then Purge / Deploy. Keep the loader if
-
-other mods need it. A megapack copy must also be disabled to turn this feature off.
-
-Logs: %LOCALAPPDATA%\CowboyBingus\Helldivers2\Logs
-Requires Bingus Shared Loader v14 or newer for this log folder.

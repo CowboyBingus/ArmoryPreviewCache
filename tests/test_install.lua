@@ -117,11 +117,11 @@ do
     local G,E=0x100000,0x200000;local UI,SM,HOLDER=0x300000,0x400000,0x500000
     local A,OWNER,WORLD=0x600000,0x700000,0x800000
     local cells={
-        [G+0x276c020]=u64(E+0x27ccc20),[E+0x27ccc20+16]=u64(A),
-        [A+752]=u64(E+0x31ff80),[A+768]=u64(E+0x3201e0),
-        [G+0x277fee8]=u64(OWNER),[OWNER+16416]=u64(HOLDER),
-        [G+0x277fe60]=u64(SM),[G+0x277fdc8]=u64(UI),[UI+15424]=u64(WORLD),
-        [UI+15884]=string.rep('\0',4)}
+        [G+0x3326308]=u64(E+0x27c8d80),[E+0x27c8d80+16]=u64(A),
+        [A+752]=u64(E+0x320dd0),[A+768]=u64(E+0x321030),
+        [G+0x347ceb0]=u64(OWNER),[OWNER+16416]=u64(HOLDER),
+        [G+0x347ce28]=u64(SM),[G+0x347cd90]=u64(UI),[UI+15432]=u64(WORLD),
+        [UI+15892]=string.rep('\0',4)}
     local header=ffi.new('uint32_t[8]');header[2]=1024;header[6]=2
     ffi.copy(header,u64(OWNER+32),8);cells[OWNER]=ffi.string(header,32)
     local top,depth=1,1
@@ -130,8 +130,8 @@ do
     end
     local api={read=function(p,n)
         local a=addr(p)
-        assert(a~=G+0x277fdb8,'thumbnail reached')
-        if a==SM+140 then return stack()end
+        assert(a~=G+0x347cd80,'thumbnail reached')
+        if a==SM+0x429c then return stack()end
         return assert(cells[a],'unexpected native read')
     end,pointer=function(b,o)
         if not b then return nil end

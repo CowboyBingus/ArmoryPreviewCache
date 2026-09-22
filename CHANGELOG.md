@@ -1,3 +1,9 @@
+# v21
+
+- Update compatibility for game build 25327279.
+- Restore equipment-list detection and asset preloading.
+- Refresh the supported equipment lookup tables.
+
 # v19
 
 - Disable routine diagnostic file writes by default.
