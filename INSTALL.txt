@@ -9,7 +9,7 @@ Logs: %LOCALAPPDATA%/CowboyBingus/Helldivers2/Logs
 
 
 
-Armory Preview Cache - v18
+Armory Preview Cache - v19
 
 
 
@@ -21,7 +21,7 @@ INSTALL
 
 1. Close Helldivers 2.
 
-2. Import Armory-Preview-Cache-v18.zip into Arsenal or HD2MM, replacing any older entry.
+2. Import Armory-Preview-Cache-v19.zip into Arsenal or HD2MM, replacing any older entry.
 
 3. Install and enable Bingus Shared Loader v14 or newer alongside it.
 

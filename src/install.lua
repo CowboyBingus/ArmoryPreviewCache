@@ -17,6 +17,7 @@ return function(create_api,native,policy,profile,signatures,build,image_native,i
     local build_key=build.game_sha256..' '..build.exe_sha256
     elapsed=0
     local function log(force)
+        if not force and rawget(_G,'CowboyBingusDiagnostics')~=true then return end
         local now=api and api.time() or 0
         if not force and last_log and now-last_log<2 then return end
         last_log=now
@@ -126,7 +127,10 @@ return function(create_api,native,policy,profile,signatures,build,image_native,i
         state.last_blocked=s.blocked
         state.pressure_reason=memory_guard:tick(api.time(),free,commit)
         cache:tick(s,api.time(),state.pressure_reason~=nil)
-        state.status=cache.status;save(false);log(false)
+        state.status=cache.status
+        -- Persist learned entries after menu interaction, or during shutdown.
+        if not s.menu and not s.active then save(false) end
+        log(false)
     end
     local function after(dt,ok,...)
         if not ok then stopped=true;cleanup();state.status='original_update_failed';log(true);error((...),0)end

@@ -16,7 +16,7 @@ research workspace can additionally run `--research`; that suite is unavailable
 in a public checkout. Public tests use synthetic data and perform no game writes.
 
 Only `publication-files.json` entries are public. Run
-`python scripts/privacy_audit.py --zip releases/Armory-Preview-Cache-v18.zip --git`
+`python scripts/privacy_audit.py --zip releases/Armory-Preview-Cache-v19.zip --git`
 after staging a release to check source, PNG metadata, archives and Git history.
 Do not commit local paths, process captures, dumps, logs, extracted game files,
 credentials or personal Git identity. Use CowboyBingus's GitHub noreply identity.

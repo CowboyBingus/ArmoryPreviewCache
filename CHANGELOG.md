@@ -1,3 +1,10 @@
+# v19
+
+- Disable routine diagnostic file writes by default.
+- Save learned profiles after menu interaction ends or during shutdown.
+- Skip thumbnail-data reads in gameplay states while preserving startup prewarming and cleanup.
+- Offline regression checks cover this update; live frame-time verification remains pending.
+
 # v18
 
 - Detects a weapon's applied pattern or attachment change from the configured

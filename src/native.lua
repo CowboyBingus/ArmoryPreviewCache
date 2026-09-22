@@ -141,6 +141,12 @@ function M.new(api,game,exe,signatures,dependencies)
         local top=depth>=1 and depth<=5 and u32(stack,(depth-1)*4) or -1
         local ui=ptr(game+0x277fdc8);local world=api.pointer(read(ui+15424,8))
         local blocked=u32(read(ui+15884,4),0)~=0
+        -- Gameplay states cannot display thumbnails or run startup prewarming.
+        -- Keep owner/world information so the policy can release old leases.
+        if top~=5 and top~=11 and depth~=0 then
+            return {owner=owner,world=world and pointer_key(world),menu=false,prefetch=false,
+                    blocked=blocked,top=top,items={},active=false,states={}}
+        end
         local tm=ptr(game+0x277fdb8);local h=read(tm,12176)
         assert(ptr(game+0x277fdb8)==tm and u32(h,11052)==7,'Thumbnail manager changed')
         local active=u32(h,11064);assert(active==0xffffffff or active<6,'Invalid thumbnail active card')
