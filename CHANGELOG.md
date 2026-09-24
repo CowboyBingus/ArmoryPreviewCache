@@ -1,3 +1,9 @@
+# v22
+
+- Update relocated native addresses and texture allocation guards for Steam build 25480438.
+- Preserve equipment preview caching and preload behavior.
+- Offline builds and package checks pass; live gameplay validation remains pending.
+
 # v21
 
 - Update compatibility for game build 25327279.

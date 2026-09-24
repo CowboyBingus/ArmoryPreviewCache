@@ -48,7 +48,7 @@ function M.new(api,game,exe,signatures,test_calls)
     function self:allocate(size)
         assert(size>0 and size<=16*1024*1024 and self.submitted_bytes+size<=128*1024*1024
             and self.submitted_count<8,'Pixel upload lifetime budget full')
-        local a=ptr(exe+0x1a101f8);local v=ptr(a)
+        local a=ptr(exe+0x1a10200);local v=ptr(a)
         assert(ptr(v+48)==exe+0x5c2e10 and ptr(v+64)==exe+0x5c2ed0,'Pixel allocator mismatch')
         local out=ffi.new('void *[3]');allocate(a,out,size,8);assert(out[0]~=nil,'Pixel allocation failed')
         return {pixels=ffi.cast('uint8_t *',out[0]),allocator=a,size=size}

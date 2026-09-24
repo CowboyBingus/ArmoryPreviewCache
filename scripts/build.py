@@ -97,7 +97,7 @@ def main():
     tests+='PASS: retired disk modules, callbacks and native GPU transfer entry points absent from shipped source\n'
     data=compile_resource(source,BUILD,'armory_preview_cache')
     archive(BUILD,RESOURCE,data)
-    cache_release=package(BUILD,'Armory Preview Cache','ArmoryPreviewCache','v21',
+    cache_release=package(BUILD,'Armory Preview Cache','ArmoryPreviewCache','v22',
         '6346a6a5-289b-436c-8cdb-c335afc9e2a7',RESOURCE,
         {'requires':{'shared_loader_api':1,'registered_by':'loader-v13'}},tests)
     (BUILD/'offline-tests.txt').write_text(tests)

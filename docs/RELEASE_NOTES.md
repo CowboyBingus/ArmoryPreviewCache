@@ -1,3 +1,3 @@
-- Update compatibility for game build 25327279.
-- Restore equipment-list detection and asset preloading.
-- Refresh the supported equipment lookup tables.
+- Update relocated native addresses and texture allocation guards for Steam build 25480438.
+- Preserve equipment preview caching and preload behavior.
+- Offline builds and package checks pass; live gameplay validation remains pending.
