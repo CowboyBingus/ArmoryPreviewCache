@@ -44,10 +44,10 @@ def archive(folder, resource_name, data):
     (folder / ARCHIVE).write_bytes(make_archive({resource_hash(resource_name): data}))
     for suffix in ('.stream', '.gpu_resources'): (folder / (ARCHIVE + suffix)).write_bytes(b'')
 
-def package(folder, name, slug, revision, guid, resource_name, relationship, tests):
+def package(folder, name, slug, revision, guid, resource_name, relationship, tests, version=None):
     files = {'data/' + ARCHIVE + s: (folder / (ARCHIVE+s)).relative_to(ROOT).as_posix()
              for s in ('', '.stream', '.gpu_resources')}
-    report = dict(name=name, slug=slug, revision=revision, guid=guid,
+    report = dict(name=name, slug=slug, revision=revision, version=version, guid=guid,
         description='Speeds up equipment thumbnails in the Armory and mission briefing by caching rendered previews and preloading their assets.',
         deployment_files=files, files={p:sha((ROOT/p).read_bytes()) for p in files.values()},
         game_exe_sha256=EXE_SHA, game_dll_sha256=GAME_DLL_SHA,
@@ -99,8 +99,9 @@ def main():
     archive(BUILD,RESOURCE,data)
     cache_release=package(BUILD,'Armory Preview Cache','ArmoryPreviewCache','v22',
         '6346a6a5-289b-436c-8cdb-c335afc9e2a7',RESOURCE,
-        {'requires':{'shared_loader_api':1,'registered_by':'loader-v13'}},tests)
+        {'requires':{'shared_loader_api':1,'registered_by':'loader-v13'}},tests,
+        version='v22.1')  # package version; the module revision stays v22
     (BUILD/'offline-tests.txt').write_text(tests)
-    print('Prepared for installation with Bingus-Shared-Loader-v13.zip: '+str(cache_release))
+    print('Built '+str(cache_release)+'; install with Bingus Shared Loader v18.')
 
 if __name__=='__main__': main()

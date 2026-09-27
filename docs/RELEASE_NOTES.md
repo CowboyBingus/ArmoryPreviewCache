@@ -1,3 +1,3 @@
-- Update relocated native addresses and texture allocation guards for Steam build 25480438.
-- Preserve equipment preview caching and preload behavior.
-- Offline builds and package checks pass; live gameplay validation remains pending.
+- Documentation-only release: the mod is identical to v22 (same compiled resource).
+- Rewrites the install notes packaged with the mod and the README status: one current status line instead of the compatibility-candidate and test-build notes left from the game-build update. Caching works in live play; a category's thumbnails are kept once every preview in it has rendered.
+- Lists one loader requirement, Bingus Shared Loader v18.

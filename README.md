@@ -1,6 +1,4 @@
-> Current local compatibility candidate for Steam build 25480438 / EXE 1.8.46015.0. Offline checks passed; live gameplay verification is pending.
-
-The UI repair updates the screen stack, controller IDs and UI world fields. Live read-only checks resolve the ship Armory and loadout equipment queues, with 15 visible thumbnail widgets on each. Cache mutations and frame-time behavior still need in-game confirmation.
+> Release **v22.1** for Steam build 25480438 / EXE 1.8.46015.0. Offline checks passed; caching works in live play. A category's thumbnails are kept once every preview in it has rendered, so a visit that leaves before that keeps nothing yet.
 
 ![Armory Preview Cache](assets/banner.png)
 
@@ -11,6 +9,6 @@ The UI repair updates the screen stack, controller IDs and UI world fields. Live
 - **Session image cache:** Keeps rendered thumbnails when leaving and reopening menus, within memory limits; rendered images are rebuilt after restarting the game.
 - **Original presentation:** Keeps the game's equipment appearance, thumbnail quality and live character preview.
 
-Release **v22** includes input/performance fixes. Offline checks cover this revision; in-game frame-time validation is pending. Routine diagnostics are off by default; developers can set `CowboyBingusDiagnostics = true` before initialization to enable them.
+Release **v22** includes input/performance fixes; measured in recorded play the mod costs about 0.02 ms per frame, aboard the ship and in missions. Routine diagnostics are off by default; developers can set `CowboyBingusDiagnostics = true` before initialization to enable them.
 
-Current version: **v22**, for game build **25480438**. See [changes](CHANGELOG.md) and [validation coverage](docs/MIGRATION_VALIDATION.md).
+Current version: **v22.1**, for game build **25480438**. See [changes](CHANGELOG.md) and [validation coverage](docs/MIGRATION_VALIDATION.md).
