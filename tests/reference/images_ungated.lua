@@ -8,18 +8,8 @@ function M.new(adapter,options)
         idle_retained=0,visible_retained=0,evicted=0,ticks=0,
         grid_hits=0,preselect_hits=0,briefing_hits=0,clear_count=0,
         rendered_items=0,refreshed=0,changed_items=0,reappeared=0,
-        gated_ticks=0,full_changed=0,full_pending=0,full_pressure=0,full_retry=0,gate_misses=0,
-        status='learning_images',enabled=options.images~=false,verify=options.verify_gate==true}
-    adapter.verify=self.verify
+        status='learning_images',enabled=options.images~=false}
     local pending,context,last_capture,view
-    -- The gate (docs/UPDATE_GATE.md). touched: textures the last full tick
-    -- marked as used; applied: that tick bound crops; retry: its apply left a
-    -- widget with a crop unbound, which the ungated tick retried every frame,
-    -- or initialized a widget's material, which the next snapshot must read
-    -- back; pressured: it ran under memory pressure (the tick after pressure
-    -- ends does work).
-    local touched,touched_count,applied,retry,pressured={},0,false,false,false
-    local verify_reference
     -- A retained crop describes one native render. Cards stop being complete
     -- when the native pipeline re-queues them (screen rebuild, scroll, or an
     -- appearance change such as a weapon pattern), and whatever they render
@@ -130,55 +120,10 @@ function M.new(adapter,options)
         end
         return nil
     end
-    -- verify_gate: compare what a full snapshot would decode now with the
-    -- decode taken right after the last full tick. Any difference is a change
-    -- the gate did not see.
-    local PARTS={'screen','items','widgets','presentation','registry','cards'}
-    local function gate_missed()
-        local now=adapter.digest(adapter:peek())
-        local missed=false
-        for _,part in ipairs(PARTS)do
-            if now[part]~=verify_reference[part]then
-                local key='gate_misses_'..part
-                self[key]=(self[key] or 0)+1;missed=true
-            end
-        end
-        if missed then self.gate_misses=self.gate_misses+1 end
-        return missed
-    end
-    local full
     function self:tick(pressure)
         if not self.enabled then self.status='images_disabled';return end
         self.ticks=self.ticks+1
-        -- One state refresh. When nothing the last full tick decoded has
-        -- changed, nothing is pending and no widget waits for a retry, a full
-        -- tick would only repeat that tick: re-send the same texture, UV, size
-        -- and opacity (native code keeps them on bound widgets) and add the
-        -- same counts. The skipped tick adds those counts, marks the same
-        -- textures used and repeats the texture ownership check.
-        local unchanged=adapter.unchanged and adapter:unchanged()
-        if unchanged and not pressure and not pressured and not pending and not retry
-            and not (self.verify and gate_missed())then
-            self.gated_ticks=self.gated_ticks+1
-            self.hits=self.hits+self.last_hits;self.misses=self.misses+self.last_misses
-            self.early_hits=self.early_hits+self.last_early_hits
-            count_surface(self.screen,self.last_hits)
-            for i=1,touched_count do touched[i].used=self.ticks end
-            self.changed_items=0
-            if applied then adapter:check_textures()end
-            if adapter.drain then adapter:drain()end
-            return
-        end
-        if unchanged==false then self.full_changed=self.full_changed+1
-        elseif pressure or pressured then self.full_pressure=self.full_pressure+1
-        elseif pending then self.full_pending=self.full_pending+1
-        elseif retry then self.full_retry=self.full_retry+1 end
-        touched_count,applied,retry,pressured=0,false,false,pressure==true
-        full(unchanged~=nil,pressure)
-        if self.verify then verify_reference=adapter.digest(adapter:peek())end
-    end
-    full=function(fresh,pressure) -- lint-ok: R10 ported from v23 unchanged; split into named steps is a follow-up (differential harness ready)
-        local s=adapter:snapshot(fresh);self.screen=s.screen or 'none'
+        local s=adapter:snapshot();self.screen=s.screen or 'none'
         self.widget_count=#s.widgets;self.named_material_widgets=0
         for _,w in ipairs(s.widgets)do if w.named_material then self.named_material_widgets=self.named_material_widgets+1 end end
         if context~=s.context or pressure then
@@ -220,8 +165,7 @@ function M.new(adapter,options)
         end
         self.changed_items=changed
         if changed>0 then self.reappeared=self.reappeared+changed end
-        local hits,misses,early,unresolved,initialized=adapter:apply(s,self.entries)
-        applied,retry=true,(unresolved or 0)>0 or (initialized or 0)>0
+        local hits,misses,early=adapter:apply(s,self.entries)
         self.last_early_hits=early or 0;self.early_hits=self.early_hits+self.last_early_hits
         self.hits=self.hits+hits;self.misses=self.misses+misses
         self.last_hits=hits;self.last_misses=misses
@@ -263,8 +207,7 @@ function M.new(adapter,options)
                 pending=nil;self.pending_items=0
                 -- The idle working replacement has no pixels yet. Bind the
                 -- completed original before this callback returns to the UI.
-                local new_hits,new_misses,new_early,new_unresolved,new_initialized=adapter:apply(s,self.entries)
-                retry=(new_unresolved or 0)>0 or (initialized or 0)+(new_initialized or 0)>0
+                local new_hits,new_misses,new_early=adapter:apply(s,self.entries)
                 self.hits=self.hits+new_hits-hits;self.misses=self.misses+new_misses-misses
                 self.early_hits=self.early_hits+(new_early or 0)-(early or 0)
                 count_surface(s.screen,new_hits-hits)
@@ -276,15 +219,6 @@ function M.new(adapter,options)
         end
         if self.status~='image_budget_full'then
             self.status=hits>0 and 'showing_retained_images' or (pending and 'completed_cards_ready_to_retain' or 'learning_images')
-        end
-        -- The textures an unchanged next tick would mark used.
-        for _,item in ipairs(s.items)do
-            local entry=self.entries[item.key]
-            if entry then
-                local t,listed=entry.texture,false
-                for i=1,touched_count do if touched[i]==t then listed=true;break end end
-                if not listed then touched_count=touched_count+1;touched[touched_count]=t end
-            end
         end
     end
     return self

@@ -5,18 +5,21 @@ Build LuaJIT with `msvcbuild.bat nogc64` from an x64 Native Tools command prompt
 Place it at `tools/src/LuaJIT/src/luajit.exe`, or set `HD2_LUAJIT` to your compiler.
 
 Run `python scripts/build.py`. The build runs the portable policy, installation,
-image-key and native material-lifetime tests and produces the standard release ZIP.
+image-key, native material-lifetime, captured-UI replay and FFI name-clash tests
+and produces the standard release ZIP.
 It does not install the mod or launch the game. Source builds independently;
 the separate Bingus Shared Loader is required only to run it in-game.
 
 `scripts/module.py` constructs the exact standalone resource for megapack builds.
 The runtime is locked to the documented game fingerprints and native signatures.
-Private live-memory fixtures and crash dumps are deliberately excluded. The local
-research workspace can additionally run `--research`; that suite is unavailable
-in a public checkout. Public tests use synthetic data and perform no game writes.
+Most tests use synthetic data. The captured-UI replays use
+`tests/fixtures/ui_*_25327279.lua`: only the bytes the adapters read from the
+ship Armory and a briefing picker in Steam build 25327279, with no identifying
+data (the privacy audit scans them). No test writes game memory. Other
+live-memory captures and crash dumps stay private.
 
 Only `publication-files.json` entries are public. Run
-`python scripts/privacy_audit.py --zip releases/Armory-Preview-Cache-v22.1.zip --git`
+`python scripts/privacy_audit.py --zip releases/Armory-Preview-Cache-v23.zip --git`
 after staging a release to check source, PNG metadata, archives and Git history.
-Do not commit local paths, process captures, dumps, logs, extracted game files,
+Do not commit local paths, other process captures, dumps, logs, extracted game files,
 credentials or personal Git identity. Use CowboyBingus's GitHub noreply identity.

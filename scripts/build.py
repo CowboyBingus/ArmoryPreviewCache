@@ -89,19 +89,23 @@ def main():
     tests=''
     for name in ('test_policy.lua','test_install.lua','test_images.lua','test_partial_images.lua','test_image_keys.lua',
                  'test_v10_images.lua','test_v10_policy.lua','test_material_synthetic.lua',
-                 'test_prewarm_recency.lua','test_render_refresh.lua'):
+                 'test_prewarm_recency.lua','test_render_refresh.lua','test_current_ui.lua',
+                 'test_visible_handoff.lua','test_visible_adapter.lua','test_platform_reads.lua',
+                 'test_gate_equivalence.lua','test_policy_gate.lua','test_frame_budget.lua'):
         tests+=run(LUA,ROOT/'tests'/name,ROOT)
+    # One fresh Lua state per load order: a C declaration cannot be undone.
+    for mode in ('hostile','sdk','after'):
+        tests+=run(LUA,ROOT/'tests'/'test_ffi_names.lua',ROOT,mode)
     source=wrapper(ROOT,GAME_DLL_SHA,EXE_SHA)
     for retired in ('pixel_native','pixel_platform','pixel_codec','pixel_signatures','self.pixels','image_cache.pixels','0x31a6b0','0x31ac20','0x31ac60','0x31acd0','0x31d8f0'):
         assert retired not in source.lower(), 'Retired disk/GPU transfer path in release: '+retired
     tests+='PASS: retired disk modules, callbacks and native GPU transfer entry points absent from shipped source\n'
     data=compile_resource(source,BUILD,'armory_preview_cache')
     archive(BUILD,RESOURCE,data)
-    cache_release=package(BUILD,'Armory Preview Cache','ArmoryPreviewCache','v22',
+    cache_release=package(BUILD,'Armory Preview Cache','ArmoryPreviewCache','v23',
         '6346a6a5-289b-436c-8cdb-c335afc9e2a7',RESOURCE,
-        {'requires':{'shared_loader_api':1,'registered_by':'loader-v13'}},tests,
-        version='v22.1')  # package version; the module revision stays v22
+        {'requires':{'shared_loader_api':1,'registered_by':'loader-v13'}},tests)
     (BUILD/'offline-tests.txt').write_text(tests)
-    print('Built '+str(cache_release)+'; install with Bingus Shared Loader v18.')
+    print('Built '+str(cache_release)+'; install with Bingus Shared Loader v18 or newer.')
 
 if __name__=='__main__': main()

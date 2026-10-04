@@ -1,3 +1,8 @@
-- Documentation-only release: the mod is identical to v22 (same compiled resource).
-- Rewrites the install notes packaged with the mod and the README status: one current status line instead of the compatibility-candidate and test-build notes left from the game-build update. Caching works in live play; a category's thumbnails are kept once every preview in it has rendered.
-- Lists one loader requirement, Bingus Shared Loader v18.
+- A short Armory visit now keeps the thumbnails of the tiles it showed once they have rendered, instead of only after the whole category finishes.
+- Frames where nothing on screen changed skip the thumbnail work and allocate nothing.
+- Memory is checked less often in missions, and each frame makes one Windows call fewer.
+- An error from the game or another mod now pauses the mod and hands every thumbnail back to the game; it resumes after 60 clean updates.
+- Another mod that declares the same Windows functions first can no longer stop this mod from starting.
+- The settings file is read on the first update, so an existing `ArmoryPreviewCache.ini` is no longer missed.
+- Requires Bingus Shared Loader v18 or newer.
+- Measured in live play: 0.017 ms per frame in missions and 0.040 ms on the ship, depending on the screens open.
