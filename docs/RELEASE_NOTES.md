@@ -1,8 +1,5 @@
-- A short Armory visit now keeps the thumbnails of the tiles it showed once they have rendered, instead of only after the whole category finishes.
-- Frames where nothing on screen changed skip the thumbnail work and allocate nothing.
-- Memory is checked less often in missions, and each frame makes one Windows call fewer.
-- An error from the game or another mod now pauses the mod and hands every thumbnail back to the game; it resumes after 60 clean updates.
-- Another mod that declares the same Windows functions first can no longer stop this mod from starting.
-- The settings file is read on the first update, so an existing `ArmoryPreviewCache.ini` is no longer missed.
-- Requires Bingus Shared Loader v18 or newer.
-- Measured in live play: 0.017 ms per frame in missions and 0.040 ms on the ship, depending on the screens open.
+- Frames with no Armory or briefing screen open and nothing loading make two reads of game memory and nothing else, on the ship and in missions: no thread check, clock call, memory check or garbage.
+- Measured in game: 0.05 ms per frame on the ship instead of 0.13, and 0.010-0.013 ms in missions instead of 0.035-0.040.
+- With rendered thumbnails kept and the Armory closed, memory is checked every 2 seconds instead of every 50 ms, so low memory releases them within 2 seconds.
+- Checking the game's asset leases decodes the lease table in place instead of copying it row by row.
+- The log adds `idle_frames`, and `verify_gate=1` also turns the idle wait off.

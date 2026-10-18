@@ -1,4 +1,4 @@
-Armory Preview Cache - v23
+Armory Preview Cache - v23.1
 
 Speeds up equipment thumbnails in the Armory and mission briefing by caching
 rendered previews and preloading their assets.
@@ -9,7 +9,7 @@ the thumbnails of the tiles it showed once they have rendered.
 
 INSTALL
 1. Close Helldivers 2.
-2. Import Armory-Preview-Cache-v23.zip into Arsenal or HD2MM, replacing any
+2. Import Armory-Preview-Cache-v23.1.zip into Arsenal or HD2MM, replacing any
    older entry.
 3. Install and enable Bingus Shared Loader v18 or newer alongside it.
 4. With Arsenal's default priority, place the shared loader last, then
@@ -35,8 +35,9 @@ Create %LOCALAPPDATA%/ArmoryPreviewCache.ini before launch:
   prewarm=1
   images=1
 Set a value to 0 to disable that feature. The retired disk option is ignored.
-verify_gate=1 (diagnostic, off by default) also does the full thumbnail read
-that unchanged frames skip and logs any difference it finds.
+verify_gate=1 (diagnostic, off by default) turns the idle wait off, also does
+the full thumbnail read that unchanged frames skip and logs any difference it
+finds.
 
 Requires Bingus Shared Loader v18 or newer: https://github.com/CowboyBingus/BingusSharedLoader/releases/latest
 Supported: Steam build 25480438 / EXE 1.8.46015.0.

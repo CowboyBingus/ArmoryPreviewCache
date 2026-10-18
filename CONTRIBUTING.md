@@ -19,7 +19,7 @@ data (the privacy audit scans them). No test writes game memory. Other
 live-memory captures and crash dumps stay private.
 
 Only `publication-files.json` entries are public. Run
-`python scripts/privacy_audit.py --zip releases/Armory-Preview-Cache-v23.zip --git`
+`python scripts/privacy_audit.py --zip releases/Armory-Preview-Cache-v23.1.zip --git`
 after staging a release to check source, PNG metadata, archives and Git history.
 Do not commit local paths, other process captures, dumps, logs, extracted game files,
 credentials or personal Git identity. Use CowboyBingus's GitHub noreply identity.

@@ -1,3 +1,11 @@
+# v23.1
+
+- Frames with no Armory or briefing screen open and nothing loading make two reads of game memory and nothing else, on the ship and in missions: no thread check, clock call, memory check or garbage.
+- Measured in game: 0.05 ms per frame on the ship instead of 0.13, and 0.010-0.013 ms in missions instead of 0.035-0.040.
+- With rendered thumbnails kept and the Armory closed, memory is checked every 2 seconds instead of every 50 ms, so low memory releases them within 2 seconds.
+- Checking the game's asset leases decodes the lease table in place instead of copying it row by row.
+- The log adds `idle_frames`, and `verify_gate=1` also turns the idle wait off.
+
 # v23
 
 - A short visit keeps its thumbnails: the visible tiles are kept as soon as they have rendered, instead of only after the whole category finishes. Backing out early no longer discards the visit.
